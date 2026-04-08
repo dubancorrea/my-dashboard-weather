@@ -34,7 +34,7 @@ The following stretch features are implemented:
 Video Walkthrough
 Here's a walkthrough of implemented required features:
 
-<img src='weather_dashboard_demo.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src="public/walkNYC.gif" title="Video Walkthrough" width="" alt="Video Walkthrough" />
 
 GIF created with ScreenToGif
 
