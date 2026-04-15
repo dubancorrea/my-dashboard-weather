@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import './App.css';
 
-// --- SHARED SIDEBAR COMPONENT ---
+// --- SIDEBAR ---
 const Sidebar = () => (
   <div className="sidebar">
     <div className="sidebar-brand">
@@ -20,7 +20,7 @@ const Sidebar = () => (
   </div>
 );
 
-// --- DETAIL VIEW COMPONENT ---
+// --- DETAIL VIEW ---
 const DetailView = ({ fullData }) => {
   const { dateId } = useParams();
   const day = fullData.find((item) => item.valid_date === dateId);
@@ -30,7 +30,9 @@ const DetailView = ({ fullData }) => {
   return (
     <div className="main-content">
       <div className="glass-card detail-container">
+        {/* Reverted Back to Dashboard link style */}
         <Link to="/" className="back-link">← Back to Dashboard</Link>
+        
         <h1>Forecast: {day.valid_date}</h1>
         <div className="detail-grid">
           <div className="detail-item"><strong>Condition:</strong> {day.weather.description}</div>
@@ -49,77 +51,93 @@ const DetailView = ({ fullData }) => {
   );
 };
 
-// --- DASHBOARD VIEW COMPONENT ---
-const DashboardView = ({ weatherData, filteredData, stats, handlers }) => (
-  <div className="main-content">
-    <div className="stats-row">
-      <div className="stat-box glass-card"><h3>New York</h3><p>New York, USA</p></div>
-      <div className="stat-box glass-card"><h3>{stats.avgTemp}°C</h3><p>Average Temp</p></div>
-      <div className="stat-box glass-card"><h3>{stats.maxRain}mm</h3><p>Max Rain</p></div>
-      <div className="stat-box glass-card"><h3>🌙</h3><p>Weather Phase</p></div>
-    </div>
+// --- DASHBOARD VIEW ---
+const DashboardView = ({ weatherData, filteredData, stats, handlers }) => {
+  const [searchInput, setSearchInput] = useState("");
 
-    <div className="dashboard-grid">
-      <div className="table-section glass-card">
-        <div className="table-controls">
-          <input 
-            type="text" 
-            placeholder="Search conditions..." 
-            className="glass-input"
-            onChange={(e) => handlers.setSearch(e.target.value)} 
-          />
-          <select className="glass-select" onChange={(e) => handlers.setFilter(e.target.value)}>
-            <option value="All">All Temperatures</option>
-            <option value="Warm">Warm (&gt;15°C)</option>
-            <option value="Cool">Cool (&le;15°C)</option>
-          </select>
-        </div>
-        
-        <div className="data-table">
-          <div className="table-header">
-            <span>Date</span><span>Temp</span><span>Condition</span><span>Details</span>
+  const handleSearchTrigger = () => {
+    handlers.setSearch(searchInput);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSearchTrigger();
+  };
+
+  return (
+    <div className="main-content">
+      <div className="stats-row">
+        <div className="stat-box glass-card"><h3>New York</h3><p>New York, USA</p></div>
+        <div className="stat-box glass-card"><h3>{stats.avgTemp}°C</h3><p>Average Temp</p></div>
+        <div className="stat-box glass-card"><h3>{stats.maxRain}mm</h3><p>Max Rain</p></div>
+        <div className="stat-box glass-card"><h3>🌙</h3><p>Weather Phase</p></div>
+      </div>
+
+      <div className="dashboard-grid">
+        <div className="table-section glass-card">
+          <div className="table-controls">
+            <input 
+              type="text" 
+              placeholder="Search conditions..." 
+              className="glass-input"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)} 
+              onKeyDown={handleKeyPress}
+            />
+            <button className="search-btn" onClick={handleSearchTrigger}>Search</button>
+            
+            <select className="glass-select" onChange={(e) => handlers.setFilter(e.target.value)}>
+              <option value="All">All Temperatures</option>
+              <option value="Warm">Warm (&gt;15°C)</option>
+              <option value="Cool">Cool (&le;15°C)</option>
+            </select>
           </div>
-          {filteredData.map((day, idx) => (
-            <div key={idx} className="table-row">
-              <span>{day.valid_date}</span>
-              <span>{day.temp}°C</span>
-              <span>{day.weather.description}</span>
-              <Link to={`/details/${day.valid_date}`} className="detail-link">🔗</Link>
+          
+          <div className="data-table">
+            <div className="table-header">
+              <span>Date</span><span>Temp</span><span>Condition</span><span>Details</span>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="charts-section">
-        <div className="chart-wrapper glass-card">
-          <h4>Temperature Trend</h4>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={weatherData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-              <XAxis dataKey="valid_date" hide />
-              <YAxis stroke="#94a3b8" fontSize={12} />
-              <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none'}} />
-              <Line type="monotone" dataKey="temp" stroke="#38bdf8" strokeWidth={3} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+            {filteredData.map((day, idx) => (
+              <div key={idx} className="table-row">
+                <span>{day.valid_date}</span>
+                <span>{day.temp}°C</span>
+                <span>{day.weather.description}</span>
+                <Link to={`/details/${day.valid_date}`} className="detail-link">🔗</Link>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="chart-wrapper glass-card">
-          <h4>Precipitation</h4>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={weatherData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-              <XAxis dataKey="valid_date" hide />
-              <YAxis stroke="#94a3b8" fontSize={12} />
-              <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} />
-              <Bar dataKey="precip" fill="#818cf8" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="charts-section">
+          <div className="chart-wrapper glass-card">
+            <h4>Temperature Trend</h4>
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={weatherData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                <XAxis dataKey="valid_date" hide />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none'}} />
+                <Line type="monotone" dataKey="temp" stroke="#38bdf8" strokeWidth={3} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="chart-wrapper glass-card">
+            <h4>Precipitation</h4>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={weatherData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                <XAxis dataKey="valid_date" hide />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} />
+                <Bar dataKey="precip" fill="#818cf8" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const App = () => {
   const [weatherData, setWeatherData] = useState([]);
